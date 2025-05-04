@@ -1,40 +1,52 @@
+-- Create a new database named 'newdb'
+CREATE DATABASE newdb;
 -- Use the new database
 USE newdb;
 
--- Query to split the Products column into separate rows
-WITH RECURSIVE numbers AS (
-    SELECT 1 AS n
-    UNION ALL
-    SELECT n + 1 FROM numbers WHERE n < 10
-)
-SELECT 
-    OrderID,
-    CustomerName,
-    TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(Products, ',', n), ',', -1)) AS Product
-FROM ProductDetail, numbers
-WHERE n <= LENGTH(Products) - LENGTH(REPLACE(Products, ',', '')) + 1
-ORDER BY OrderID;
+-- Create a new table named 'ProductDetail' with the specified columns
+CREATE TABLE ProductDetail (
+    OrderID INT,
+    CustomerName VARCHAR(100),
+    Products VARCHAR(100)
+);
+-- Insert sample data into the 'ProductDetail' table
+INSERT INTO ProductDetail(OrderID, CustomerName, Products)
+VALUES
+(101, 'John Doe', 'Laptop'),
+(101, 'John Doe', 'Mouse'),
+(102, 'Jane Smith', 'Tablet'),
+(102, 'Jane Smith', 'Keyboard'),
+(102, 'Jane Smith', 'Mouse'),
+(103, 'Emily Clark', 'Phone');
 
-
--- Create a new table to store the split data
+-- Question 2
+-- Create a new table named 'Orders' with the specified columns
 CREATE TABLE Orders (
     OrderID INT PRIMARY KEY,
     CustomerName VARCHAR(100)
 );
+-- Insert sample data into the 'Orders' table
+INSERT INTO Orders (OrderID, CustomerName)
+VALUES
+(101, 'John Doe'),
+(102, 'Jane Smith'),
+(103, 'Emily Clark');
 
--- Create a new table to store the split data
-CREATE TABLE OrderItems (
+-- Create a new table named 'Product' with the specified columns
+CREATE TABLE Product (
     OrderID INT,
-    Product VARCHAR(255),
+    Product VARCHAR(100),
     Quantity INT,
     PRIMARY KEY (OrderID, Product),
     FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
 );
+-- Insert sample data into the 'Product' table
+INSERT INTO Product (OrderID, Product, Quantity)
+VALUES
+(101, 'Laptop', 2),
+(101, 'Mouse', 1),
+(102, 'Tablet', 3),
+(102, 'Keyboard', 1),
+(102, 'Mouse', 2),
+(103, 'Phone', 1);
 
--- Insert unique orders
-INSERT INTO Orders (OrderID, CustomerName)
-SELECT DISTINCT OrderID, CustomerName FROM OrderDetails;
-
--- Insert product items
-INSERT INTO OrderItems (OrderID, Product, Quantity)
-SELECT OrderID, Product, Quantity FROM OrderDetails;
